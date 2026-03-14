@@ -1,24 +1,41 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Slot, useRouter, useSegments } from "expo-router";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "../utils/firebaseConfig";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+const InitialLayout = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const segments = useSegments();
+  const router = useRouter();
 
-export const unstable_settings = {
-  anchor: '(tabs)',
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsLoaded(true);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (user && inAuthGroup) {
+      router.replace("/");
+    } else if (!user && !inAuthGroup) {
+      router.replace("/(auth)/sign-in");
+    }
+  }, [user, isLoaded, segments]);
+
+  if (!isLoaded) return null;
+
+  return <Slot />;
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <InitialLayout />
   );
 }
