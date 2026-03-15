@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { View, TextInput, Text, StyleSheet, TextInputProps, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from "react-native";
 
 interface CustomInputProps extends TextInputProps {
   label: string;
@@ -35,8 +35,6 @@ export default function CustomInput({ label, error, isPassword, onFocus, onBlur,
         <TextInput
           style={styles.input}
           placeholderTextColor="#94A3B8"
-          onFocus={handleFocus}
-          onBlur={handleBlur}
           secureTextEntry={isPassword && !showPassword}
           {...props}
         />
