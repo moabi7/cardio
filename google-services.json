@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "252153939100",
+    "project_id": "tubeguruj",
+    "storage_bucket": "tubeguruj.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252153939100:android:b31928b3f4b99f9e32d959",
+        "android_client_info": {
+          "package_name": "com.anonymous.cardio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "252153939100-09f1umafclh5doji6bqe4otudg7e5ns6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4TKf8V-m-3Hv8qxKvIQ-Nl_fU-7_S_1Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "252153939100-09f1umafclh5doji6bqe4otudg7e5ns6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

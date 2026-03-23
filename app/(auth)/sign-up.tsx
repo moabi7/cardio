@@ -6,6 +6,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import CustomInput from "../../components/CustomInput";
 import CustomButton from "../../components/CustomButton";
+import { signInWithGoogle } from "../../utils/googleAuth";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -44,7 +45,17 @@ export default function SignUpScreen() {
   };
 
   const onGoogleSignInPress = async () => {
-    Alert.alert("Coming Soon", "Google Sign-In needs to be configured with Firebase Native SDK.");
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      // navigation handles by onAuthStateChanged in _layout.tsx
+    } catch (err: any) {
+      if (err.code !== "ASYNC_OP_IN_PROGRESS") {
+        Alert.alert("Google Sign-In Failed", err.message);
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   return (
