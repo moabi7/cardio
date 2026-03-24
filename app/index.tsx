@@ -2,6 +2,7 @@ import { Text, View, StyleSheet } from "react-native";
 import { auth } from "../utils/firebaseConfig";
 import { signOut } from "firebase/auth";
 import CustomButton from "../components/CustomButton";
+import Colors from "../constants/Colors";
 
 export default function Index() {
   const user = auth.currentUser;
@@ -32,18 +33,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: Colors.background,
     padding: 24,
   },
   title: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#0F172A",
+    color: Colors.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#64748B",
+    color: Colors.textSecondary,
     textAlign: "center",
   },
 });

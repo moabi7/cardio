@@ -9,6 +9,7 @@ import GoogleButton from "../../components/GoogleButton";
 import { signInWithGoogle } from "../../utils/googleAuth";
 import { User, UserRole } from "../../models/user";
 import { saveUserToFirebase } from "../../services/userService";
+import Colors from "../../constants/Colors";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -136,7 +137,7 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: Colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -156,13 +157,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#0F172A",
+    color: Colors.text,
     marginBottom: 8,
     textAlign: "center",
   },
   subtitle: {
     fontSize: 15,
-    color: "#64748B",
+    color: Colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
     paddingHorizontal: 20,
@@ -182,10 +183,10 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: Colors.divider,
   },
   dividerText: {
-    color: "#94A3B8",
+    color: Colors.textMuted,
     paddingHorizontal: 16,
     fontSize: 14,
     fontWeight: "600",
@@ -198,11 +199,11 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   footerText: {
-    color: "#64748B",
+    color: Colors.textSecondary,
     fontSize: 15,
   },
   footerLink: {
-    color: "#FF5E5B",
+    color: Colors.primary,
     fontSize: 15,
     fontWeight: "700",
   },

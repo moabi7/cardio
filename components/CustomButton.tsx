@@ -1,5 +1,6 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from "react-native";
+import Colors from "../constants/Colors";
 
 interface CustomButtonProps {
   title: string;
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   primary: {
-    backgroundColor: "#FF5E5B", // energetic UI color
+    backgroundColor: Colors.primary, // using new primary green
   },
   secondary: {
     backgroundColor: "#F1F5F9",
