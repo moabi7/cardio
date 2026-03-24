@@ -1,7 +1,9 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebaseConfig";
+import { User, UserRole } from "../models/user";
+import { saveUserToFirebase } from "../services/userService";
 
 GoogleSignin.configure({
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
@@ -27,12 +29,28 @@ export const signInWithGoogle = async () => {
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        fullName: user.displayName || "New User",
-        email: user.email,
-        createdAt: new Date().toISOString(),
-        role: "user",
-      });
+      const newUser = new User();
+      newUser.uid = user.uid;
+      newUser.email = user.email || "";
+      newUser.imageUrl = user.photoURL || "";
+      newUser.role = UserRole.USER;
+
+      const displayName = user.displayName || "";
+      if (displayName.trim()) {
+        const nameParts = displayName.trim().split(/\s+/);
+        if (nameParts.length > 1) {
+          newUser.firstName = nameParts[0];
+          newUser.lastName = nameParts.slice(1).join(" ");
+        } else {
+          newUser.firstName = displayName;
+          newUser.lastName = displayName;
+        }
+      } else {
+        newUser.firstName = "New";
+        newUser.lastName = "User";
+      }
+
+      await saveUserToFirebase(newUser);
     }
 
     return user;

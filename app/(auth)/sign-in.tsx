@@ -5,6 +5,7 @@ import { auth } from "../../utils/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import CustomInput from "../../components/CustomInput";
 import CustomButton from "../../components/CustomButton";
+import GoogleButton from "../../components/GoogleButton";
 import { signInWithGoogle } from "../../utils/googleAuth";
 
 export default function SignInScreen() {
@@ -82,10 +83,9 @@ export default function SignInScreen() {
             <View style={styles.divider} />
           </View>
 
-          <CustomButton 
+          <GoogleButton 
             title="Continue with Google" 
             onPress={onGoogleSignInPress} 
-            variant="outline"
             loading={googleLoading}
           />
         </View>

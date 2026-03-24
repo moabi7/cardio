@@ -1,41 +1,39 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { auth, db } from "../../utils/firebaseConfig";
+import { auth } from "../../utils/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
 import CustomInput from "../../components/CustomInput";
 import CustomButton from "../../components/CustomButton";
+import GoogleButton from "../../components/GoogleButton";
 import { signInWithGoogle } from "../../utils/googleAuth";
+import { User, UserRole } from "../../models/user";
+import { saveUserToFirebase } from "../../services/userService";
 
 export default function SignUpScreen() {
   const router = useRouter();
 
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const saveUserToFirebase = async (userId: string, email: string, name: string) => {
-    try {
-      await setDoc(doc(db, "users", userId), {
-        email,
-        fullName: name,
-        createdAt: new Date().toISOString(),
-        role: "user"
-      });
-      console.log("User saved to Firestore!");
-    } catch (error) {
-      console.error("Error saving user to Firestore: ", error);
-    }
-  };
 
   const onSignUpPress = async () => {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, emailAddress, password);
-      await saveUserToFirebase(userCredential.user.uid, emailAddress, fullName);
+      
+      const newUser = new User();
+      newUser.uid = userCredential.user.uid;
+      newUser.email = emailAddress;
+      newUser.firstName = firstName;
+      newUser.lastName = lastName;
+      newUser.role = UserRole.USER;
+      
+      await saveUserToFirebase(newUser);
       // navigation handled by onAuthStateChanged in _layout.tsx
     } catch (err: any) {
       Alert.alert("Sign Up Failed", err.message);
@@ -68,13 +66,26 @@ export default function SignUpScreen() {
         </View>
 
         <View style={styles.formContainer}>
-          <CustomInput
-            label="Full Name"
-            placeholder="John Doe"
-            value={fullName}
-            onChangeText={setFullName}
-            autoCapitalize="words"
-          />
+          <View style={styles.nameRow}>
+            <View style={{ flex: 1, marginRight: 8 }}>
+              <CustomInput
+                label="First Name"
+                placeholder="John"
+                value={firstName}
+                onChangeText={setFirstName}
+                autoCapitalize="words"
+              />
+            </View>
+            <View style={{ flex: 1, marginLeft: 8 }}>
+              <CustomInput
+                label="Last Name"
+                placeholder="Doe"
+                value={lastName}
+                onChangeText={setLastName}
+                autoCapitalize="words"
+              />
+            </View>
+          </View>
           <CustomInput
             label="Email Address"
             placeholder="john@example.com"
@@ -91,7 +102,12 @@ export default function SignUpScreen() {
             isPassword
           />
           
-          <CustomButton title="Sign Up" onPress={onSignUpPress} loading={loading} />
+          <CustomButton 
+            title="Sign Up" 
+            onPress={onSignUpPress} 
+            loading={loading} 
+            disabled={!firstName || !lastName || !emailAddress || !password}
+          />
           
           <View style={styles.dividerContainer}>
             <View style={styles.divider} />
@@ -99,10 +115,9 @@ export default function SignUpScreen() {
             <View style={styles.divider} />
           </View>
 
-          <CustomButton 
+          <GoogleButton 
             title="Sign up with Google" 
             onPress={onGoogleSignInPress} 
-            variant="outline"
             loading={googleLoading}
           />
         </View>
@@ -154,6 +169,10 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     width: "100%",
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   dividerContainer: {
     flexDirection: "row",
