@@ -3,8 +3,10 @@ import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from "
 import Colors from "../constants/Colors";
 
 const { width } = Dimensions.get("window");
-// Exactly 7 items on screen
-const ITEM_WIDTH = width / 7;
+const GAP = 5;
+const PADDING = 15;
+// Exactly 7 items on screen with 8px gaps and side padding
+const ITEM_WIDTH = (width - (2 * PADDING) - (6 * GAP)) / 7;
 
 interface DateItem {
   date: Date;
@@ -98,11 +100,12 @@ export default function WeeklyCalendar() {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
-        snapToInterval={ITEM_WIDTH}
+        ItemSeparatorComponent={() => <View style={{ width: GAP }} />}
+        snapToInterval={ITEM_WIDTH + GAP}
         decelerationRate="fast"
         getItemLayout={(data, index) => ({
-          length: ITEM_WIDTH,
-          offset: ITEM_WIDTH * index,
+          length: ITEM_WIDTH + GAP,
+          offset: (ITEM_WIDTH + GAP) * index,
           index,
         })}
       />
@@ -118,7 +121,7 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
   },
   listContent: {
-    // No extra padding needed
+    paddingHorizontal: PADDING,
   },
   dayCard: {
     width: ITEM_WIDTH,
