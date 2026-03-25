@@ -1,60 +1,42 @@
-import { Text, View, StyleSheet } from "react-native";
-import { auth } from "../../utils/firebaseConfig";
-import { signOut } from "firebase/auth";
-import CustomButton from "../../components/CustomButton";
+import React from "react";
+import { View, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import HomeHeader from "../../components/HomeHeader";
+import WeeklyCalendar from "../../components/WeeklyCalendar";
 import Colors from "../../constants/Colors";
-import { useRouter } from "expo-router";
-import { useAuth } from "../../contexts/AuthContext";
-import { clearCachedProfile } from "../../services/userService";
 
 export default function HomeScreen() {
-  const router = useRouter();
-  const { user } = useAuth();
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      await clearCachedProfile();
-      router.replace("/(auth)/sign-in");
-    } catch (error) {
-      console.error("Error signing out: ", error);
-    }
-  };
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Home Screen</Text>
-      <Text style={styles.subtitle}>
-        Logged in as: {user?.email}
-      </Text>
-      
-      <CustomButton 
-        title="Sign Out" 
-        onPress={handleSignOut} 
-        variant="outline" 
-        style={{ width: 200, marginTop: 40 }} 
-      />
-    </View>
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <ScrollView 
+        style={styles.scrollView} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <HomeHeader />
+        <WeeklyCalendar />
+        
+        {/* Further home content will go here */}
+        <View style={styles.placeholderBody} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     backgroundColor: Colors.background,
-    padding: 24,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: Colors.text,
-    marginBottom: 8,
+  scrollView: {
+    flex: 1,
   },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    textAlign: "center",
+  scrollContent: {
+    paddingBottom: 100, // Space for floating tab bar
+  },
+  placeholderBody: {
+    flex: 1,
+    paddingHorizontal: 20,
+    marginTop: 20,
   },
 });
