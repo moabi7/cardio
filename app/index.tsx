@@ -4,12 +4,39 @@ import { signOut } from "firebase/auth";
 import CustomButton from "../components/CustomButton";
 import Colors from "../constants/Colors";
 
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { checkProfileCompletion } from "../services/userService";
+
 export default function Index() {
+  const router = useRouter();
   const user = auth.currentUser;
+  const [checkingProfile, setCheckingProfile] = useState(true);
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      if (user) {
+        const complete = await checkProfileCompletion(user.uid);
+        if (!complete) {
+          router.replace("/(onboarding)/step-form");
+        } else {
+          setCheckingProfile(false);
+        }
+      } else {
+        setCheckingProfile(false);
+      }
+    };
+    
+    checkOnboarding();
+  }, [user]);
 
   const handleSignOut = () => {
-    signOut(auth);
+    signOut(auth).then(() => {
+      router.replace("/(auth)/sign-in");
+    });
   };
+
+  if (checkingProfile) return null; // Show nothing while checking to avoid flicker
 
   return (
     <View style={styles.container}>
