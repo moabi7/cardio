@@ -1,13 +1,13 @@
 import { Text, View, StyleSheet } from "react-native";
-import { auth } from "../utils/firebaseConfig";
+import { auth } from "../../utils/firebaseConfig";
 import { signOut } from "firebase/auth";
-import CustomButton from "../components/CustomButton";
-import Colors from "../constants/Colors";
+import CustomButton from "../../components/CustomButton";
+import Colors from "../../constants/Colors";
 import { useRouter } from "expo-router";
-import { useAuth } from "../contexts/AuthContext";
-import { clearCachedProfile } from "../services/userService";
+import { useAuth } from "../../contexts/AuthContext";
+import { clearCachedProfile } from "../../services/userService";
 
-export default function Index() {
+export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
 
@@ -23,9 +23,9 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to CardioAI</Text>
+      <Text style={styles.title}>Home Screen</Text>
       <Text style={styles.subtitle}>
-        You are signed in as: {user?.email}
+        Logged in as: {user?.email}
       </Text>
       
       <CustomButton 

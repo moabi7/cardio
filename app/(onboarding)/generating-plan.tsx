@@ -92,11 +92,11 @@ export default function GeneratingPlan() {
         setProgress(1);
 
         setTimeout(() => {
-          router.replace("/");
+          router.replace("/(tabs)");
         }, 1000);
       } catch (error) {
         console.error("Failed to generate plan:", error);
-        router.replace("/");
+        router.replace("/(tabs)");
       }
     };
 

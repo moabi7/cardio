@@ -19,7 +19,7 @@ const InitialLayout = () => {
       if (!isOnboardingComplete && !inOnboardingGroup) {
         router.replace("/(onboarding)/step-form");
       } else if (isOnboardingComplete && (inAuthGroup || inOnboardingGroup)) {
-        router.replace("/");
+        router.replace("/(tabs)");
       }
     }
   }, [user, isLoading, segments, isOnboardingComplete]);
