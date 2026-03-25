@@ -10,9 +10,11 @@ import { signInWithGoogle } from "../../utils/googleAuth";
 import { User, UserRole } from "../../models/user";
 import { saveUserToFirebase } from "../../services/userService";
 import Colors from "../../constants/Colors";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const { refreshProfile } = useAuth();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -35,6 +37,7 @@ export default function SignUpScreen() {
       newUser.role = UserRole.USER;
       
       await saveUserToFirebase(newUser);
+      await refreshProfile();
       // navigation handled by onAuthStateChanged in _layout.tsx
     } catch (err: any) {
       Alert.alert("Sign Up Failed", err.message);
@@ -47,6 +50,7 @@ export default function SignUpScreen() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
+      await refreshProfile();
       // navigation handles by onAuthStateChanged in _layout.tsx
     } catch (err: any) {
       if (err.code !== "ASYNC_OP_IN_PROGRESS") {

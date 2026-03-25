@@ -33,8 +33,6 @@ import CustomButton from "../../components/CustomButton";
 import ProgressBar from "../../components/ProgressBar";
 import SelectionCard from "../../components/SelectionCard";
 import Colors from "../../constants/Colors";
-import { updateUserProfile } from "../../services/userService";
-import { auth } from "../../utils/firebaseConfig";
 
 const { width } = Dimensions.get("window");
 
@@ -87,7 +85,7 @@ export default function OnboardingForm() {
 
   const handleFinish = () => {
     const birthdateStr = `${formData.birthdate.year}-${formData.birthdate.month.padStart(2, "0")}-${formData.birthdate.day.padStart(2, "0")}`;
-    
+
     router.push({
       pathname: "/(onboarding)/generating-plan",
       params: {
@@ -199,6 +197,7 @@ export default function OnboardingForm() {
             style={styles.dateInput}
             placeholder="DD"
             keyboardType="number-pad"
+            placeholderTextColor={Colors.black}
             maxLength={2}
             value={formData.birthdate.day}
             onChangeText={(val) => setFormData({ ...formData, birthdate: { ...formData.birthdate, day: val } })}
@@ -210,6 +209,7 @@ export default function OnboardingForm() {
             style={styles.dateInput}
             placeholder="MM"
             keyboardType="number-pad"
+            placeholderTextColor={Colors.black}
             maxLength={2}
             value={formData.birthdate.month}
             onChangeText={(val) => setFormData({ ...formData, birthdate: { ...formData.birthdate, month: val } })}
@@ -220,6 +220,7 @@ export default function OnboardingForm() {
           <TextInput
             style={[styles.dateInput, { width: 80 }]}
             placeholder="YYYY"
+            placeholderTextColor={Colors.black}
             keyboardType="number-pad"
             maxLength={4}
             value={formData.birthdate.year}

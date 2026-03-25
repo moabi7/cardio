@@ -1,32 +1,14 @@
 import { Slot, useRouter, useSegments } from "expo-router";
-import { useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "../utils/firebaseConfig";
-import { checkProfileCompletion } from "../services/userService";
+import { useEffect } from "react";
+import { AuthProvider, useAuth } from "../contexts/AuthContext";
 
 const InitialLayout = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean | null>(null);
+  const { user, isOnboardingComplete, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const complete = await checkProfileCompletion(currentUser.uid);
-        setIsOnboardingComplete(complete);
-      } else {
-        setIsOnboardingComplete(null);
-      }
-      setIsLoaded(true);
-    });
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (!isLoaded || isOnboardingComplete === null && user) return;
+    if (isLoading || (isOnboardingComplete === null && user)) return;
 
     const inAuthGroup = segments[0] === "(auth)";
     const inOnboardingGroup = segments[0] === "(onboarding)";
@@ -40,15 +22,17 @@ const InitialLayout = () => {
         router.replace("/");
       }
     }
-  }, [user, isLoaded, segments, isOnboardingComplete]);
+  }, [user, isLoading, segments, isOnboardingComplete]);
 
-  if (!isLoaded) return null;
+  if (isLoading) return null;
 
   return <Slot />;
 };
 
 export default function RootLayout() {
   return (
-    <InitialLayout />
+    <AuthProvider>
+      <InitialLayout />
+    </AuthProvider>
   );
 }

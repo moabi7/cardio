@@ -84,3 +84,10 @@ export const checkProfileCompletion = async (uid: string) => {
     return false;
   }
 };
+export const clearCachedProfile = async () => {
+  try {
+    await AsyncStorage.removeItem(USER_STORAGE_KEY);
+  } catch (error) {
+    console.error("Error clearing cached profile: ", error);
+  }
+};

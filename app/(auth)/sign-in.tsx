@@ -8,9 +8,11 @@ import CustomButton from "../../components/CustomButton";
 import GoogleButton from "../../components/GoogleButton";
 import { signInWithGoogle } from "../../utils/googleAuth";
 import Colors from "../../constants/Colors";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function SignInScreen() {
   const router = useRouter();
+  const { refreshProfile } = useAuth();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +23,7 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, emailAddress, password);
+      await refreshProfile();
       // navigation is handled by onAuthStateChanged in _layout.tsx
     } catch (err: any) {
       Alert.alert("Sign In Failed", err.message);
@@ -33,6 +36,7 @@ export default function SignInScreen() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
+      await refreshProfile();
       // navigation is handled by onAuthStateChanged in _layout.tsx
     } catch (err: any) {
       if (err.code !== "ASYNC_OP_IN_PROGRESS") {

@@ -1,29 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Animated, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Animated, Dimensions, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import { Target02Icon, WorkoutRunIcon, AppleIcon } from "@hugeicons/core-free-icons";
+import { Target02Icon, WorkoutRunIcon, AppleIcon, CheckmarkCircle01Icon } from "@hugeicons/core-free-icons";
 import Colors from "../../constants/Colors";
 import ProgressBar from "../../components/ProgressBar";
 import { generateFitnessPlan } from "../../services/aiService";
 import { updateUserProfile } from "../../services/userService";
 import { auth } from "../../utils/firebaseConfig";
+import { useAuth } from "../../contexts/AuthContext";
 
 const { width } = Dimensions.get("window");
 
 const LOADING_STEPS = [
-  { icon: Target02Icon, text: "Analyzing your goals..." },
-  { icon: WorkoutRunIcon, text: "Crafting your workout schedule..." },
-  { icon: AppleIcon, text: "Optimizing your nutrition plan..." },
+  { id: 0, icon: Target02Icon, text: "Analyzing your goals..." },
+  { id: 1, icon: WorkoutRunIcon, text: "Crafting your workout schedule..." },
+  { id: 2, icon: AppleIcon, text: "Optimizing your nutrition plan..." },
 ];
 
 export default function GeneratingPlan() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { refreshProfile } = useAuth();
   const [progress, setProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState(0);
-  const fadeAnim = new Animated.Value(1);
+  const [stepStatuses, setStepStatuses] = useState<('loading' | 'completed' | 'pending')[]>(['loading', 'pending', 'pending']);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -51,6 +52,25 @@ export default function GeneratingPlan() {
           weight: Number(params.weight),
         };
 
+        // Dummy timers for the first two steps
+        setTimeout(() => {
+          setStepStatuses(prev => {
+            const next = [...prev];
+            next[0] = 'completed';
+            next[1] = 'loading';
+            return next;
+          });
+        }, 2500);
+
+        setTimeout(() => {
+          setStepStatuses(prev => {
+            const next = [...prev];
+            next[1] = 'completed';
+            next[2] = 'loading';
+            return next;
+          });
+        }, 5000);
+
         const plan = await generateFitnessPlan(userData);
         const user = auth.currentUser;
         
@@ -59,15 +79,23 @@ export default function GeneratingPlan() {
             fitnessPlan: plan,
             onboardingComplete: true,
           });
+          // Refresh the global auth state before redirecting
+          await refreshProfile();
         }
 
+        // Final step completion
+        setStepStatuses(prev => {
+          const next = [...prev];
+          next[2] = 'completed';
+          return next;
+        });
         setProgress(1);
+
         setTimeout(() => {
           router.replace("/");
-        }, 500);
+        }, 1000);
       } catch (error) {
         console.error("Failed to generate plan:", error);
-        // Handle error (maybe retry or skip)
         router.replace("/");
       }
     };
@@ -77,49 +105,51 @@ export default function GeneratingPlan() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const stepInterval = setInterval(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => {
-        setCurrentStep((prev) => (prev + 1) % LOADING_STEPS.length);
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }).start();
-      });
-    }, 3000);
-
-    return () => clearInterval(stepInterval);
-  }, []);
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.lottiePlaceholder}>
-          <HugeiconsIcon 
-            icon={LOADING_STEPS[currentStep].icon} 
-            size={80} 
-            color={Colors.primary} 
-          />
+        <View style={styles.headerContainer}>
+          <Text style={styles.title}>Creating your plan</Text>
+          <Text style={styles.subtitle}>Our AI is personalizing your fitness journey based on your unique goals.</Text>
         </View>
 
-        <Animated.Text style={[styles.loadingText, { opacity: fadeAnim }]}>
-          {LOADING_STEPS[currentStep].text}
-        </Animated.Text>
-
-        <View style={styles.progressContainer}>
-          <ProgressBar progress={progress} />
-          <Text style={styles.percentageText}>{Math.round(progress * 100)}%</Text>
+        <View style={styles.stepsContainer}>
+          {LOADING_STEPS.map((step, index) => {
+            const status = stepStatuses[index];
+            return (
+              <View key={step.id} style={[styles.stepItem, status === 'pending' && styles.pendingStep]}>
+                <View style={[styles.iconWrapper, status === 'completed' && styles.completedIconWrapper]}>
+                  <HugeiconsIcon 
+                    icon={step.icon} 
+                    size={24} 
+                    color={status === 'completed' ? Colors.white : (status === 'loading' ? Colors.primary : Colors.textMuted)} 
+                  />
+                </View>
+                <Text style={[styles.stepText, status === 'loading' && styles.activeStepText, status === 'pending' && styles.pendingStepText]}>
+                  {step.text}
+                </Text>
+                <View style={styles.statusWrapper}>
+                  {status === 'loading' && <ActivityIndicator size="small" color={Colors.primary} />}
+                  {status === 'completed' && (
+                    <HugeiconsIcon icon={CheckmarkCircle01Icon} size={20} color={Colors.primary} />
+                  )}
+                </View>
+              </View>
+            );
+          })}
         </View>
 
-        <Text style={styles.tipTitle}>Did you know?</Text>
-        <Text style={styles.tipText}>
-          Consistency is more important than perfection. Showing up every day is the key to long-term results.
-        </Text>
+        <View style={styles.footer}>
+          <View style={styles.progressContainer}>
+            <ProgressBar progress={progress} />
+            <Text style={styles.percentageText}>{Math.round(progress * 100)}%</Text>
+          </View>
+
+          <Text style={styles.tipTitle}>Pro Tip</Text>
+          <Text style={styles.tipText}>
+            Drinking enough water and getting 7-8 hours of sleep significantly improves fat loss and muscle recovery.
+          </Text>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -132,36 +162,86 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 32,
-    alignItems: "center",
-    justifyContent: "center",
+    padding: 24,
+    justifyContent: "space-between",
   },
-  lottiePlaceholder: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: Colors.primaryLight,
-    justifyContent: "center",
+  headerContainer: {
+    marginTop: 40,
     alignItems: "center",
-    marginBottom: 40,
   },
-  loadingText: {
-    fontSize: 20,
-    fontWeight: "700",
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
     color: Colors.text,
+    marginBottom: 12,
     textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+    textAlign: "center",
+    lineHeight: 22,
+    paddingHorizontal: 20,
+  },
+  stepsContainer: {
+    backgroundColor: Colors.background,
+    borderRadius: 32,
+    padding: 24,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+  },
+  stepItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 12,
+  },
+  pendingStep: {
+    opacity: 0.5,
+  },
+  iconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  completedIconWrapper: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "600",
+    color: Colors.text,
+  },
+  activeStepText: {
+    color: Colors.primary,
+    fontWeight: "700",
+  },
+  pendingStepText: {
+    color: Colors.textMuted,
+  },
+  statusWrapper: {
+    width: 24,
+    alignItems: "center",
+  },
+  footer: {
     marginBottom: 40,
-    height: 60,
   },
   progressContainer: {
     width: "100%",
     alignItems: "center",
-    marginBottom: 48,
+    marginBottom: 32,
   },
   percentageText: {
     marginTop: 12,
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
     color: Colors.primary,
   },
   tipTitle: {
@@ -169,6 +249,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: Colors.text,
     marginBottom: 8,
+    textAlign: "center",
   },
   tipText: {
     fontSize: 14,

@@ -3,7 +3,7 @@ import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebaseConfig";
 import { User, UserRole } from "../models/user";
-import { saveUserToFirebase } from "../services/userService";
+import { fetchUserProfile, saveUserToFirebase } from "../services/userService";
 
 GoogleSignin.configure({
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
@@ -51,6 +51,9 @@ export const signInWithGoogle = async () => {
       }
 
       await saveUserToFirebase(newUser);
+    } else {
+      // For existing users, ensure profile is in local storage
+      await fetchUserProfile(user.uid);
     }
 
     return user;
